@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ministry Member Information</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#1b3c30;background:#f7f4eb}*{box-sizing:border-box}
+body{margin:0;padding:24px 14px}.card{max-width:620px;margin:22px auto;background:#fffefa;border:1px solid #d9dfd3;border-radius:24px;box-shadow:0 15px 45px #183e2912;overflow:hidden}
+.hero{text-align:center;background:#214d3a;color:white;padding:34px 24px}.cross{font-size:30px;color:#d7bd7d}.hero h1{font-family:Georgia,serif;font-size:31px;font-weight:400;margin:12px 0}.hero p{margin:0;color:#e5efe8;line-height:1.6}
+.body{padding:28px}label{display:block;font-weight:650;margin:18px 0 7px;font-size:15px}input,textarea{width:100%;border:1.5px solid #bdc9be;border-radius:11px;padding:14px;font:inherit;background:white;color:#1b3c30}input:focus,textarea:focus{outline:3px solid #bdd5c6}textarea{min-height:88px;resize:vertical}
+.optional{font-weight:400;color:#617269;font-size:13px}.consent{display:flex;align-items:flex-start;gap:10px;margin:23px 0}.consent input{width:20px;flex:none;margin-top:3px}.consent label{margin:0;font-weight:400;line-height:1.5}
+.button{background:#214d3a;color:white;border:0;border-radius:12px;width:100%;padding:16px;font:inherit;font-weight:700;cursor:pointer}.button:disabled{opacity:.5;cursor:wait}
+.note{font-size:12px;color:#69776d;line-height:1.6;margin-top:15px;text-align:center}.status{padding:12px;border-radius:10px;margin-top:16px;display:none}.error{background:#fce8e7;color:#832a27}.hidden{display:none}.thankyou{text-align:center;padding:45px 28px}.thankyou h2{font-family:Georgia,serif;font-size:28px}small{color:#e8e5d5}
+</style></head>
+<body><main class="card"><header class="hero"><div class="cross">✝</div><h1>Our Ministry Family</h1><p>Member Information Record<br><small>Faith • Fellowship • Community</small></p></header>
+<section class="body" id="formSection"><p>Please complete this form for our ministry's private records. No account is needed.</p>
+<form id="form">
+<label for="fullName">1. Full Name *</label><input id="fullName" name="fullName" autocomplete="name" required maxlength="160">
+<label for="birthday">2. Birthday (Month/Day/Year) *</label><input id="birthday" name="birthday" type="date" required>
+<label for="address">3. Complete Home Address *</label><textarea id="address" name="address" autocomplete="street-address" required maxlength="500"></textarea>
+<label for="email">4. Email Address *</label><input id="email" name="email" type="email" autocomplete="email" required maxlength="200">
+<label for="phone">5. Contact Number *</label><input id="phone" name="phone" type="tel" autocomplete="tel" required maxlength="30">
+<label for="spiritualBirthday">6. Spiritual Birthday <span class="optional">(Optional, if remembered)</span></label><input id="spiritualBirthday" name="spiritualBirthday" type="date">
+<label for="verse">7. Favorite Bible Verse *</label><textarea id="verse" name="verse" required maxlength="500" placeholder="Example: Philippians 4:13"></textarea>
+<div class="consent"><input type="checkbox" id="consent" required><label for="consent">I consent to the ministry collecting and using this information solely for internal member recordkeeping. I understand I may contact the ministry to request correction or deletion of my information.</label></div>
+<button class="button" id="submit" type="submit">SUBMIT MY INFORMATION</button><div id="status" class="status" role="alert"></div></form>
+<p class="note">Your information should be accessible only to authorized ministry recordkeepers.</p></section>
+<section id="thanks" class="thankyou hidden"><div style="font-size:44px">✓</div><h2>Information Submitted</h2><p>Thank you for helping us keep our ministry records up to date. God bless you!</p><p id="ref"></p></section></main>
+<script>
+const form=document.getElementById('form'),status=document.getElementById('status'),button=document.getElementById('submit');
+form.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const endpoint='';
+ if(!endpoint){status.style.display='block';status.className='status error';status.textContent='This form is a preview. The ministry administrator must connect a secure records database before submissions can be accepted. No information has been sent or saved.';return}
+ button.disabled=true;status.style.display='none';
+ try{
+ const data=Object.fromEntries(new FormData(form).entries());data.consent=true;
+ const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+ if(!response.ok)throw Error('Unable to save');
+ const result=await response.json();if(!result.ok)throw Error('Unable to save');
+ document.getElementById('formSection').classList.add('hidden');document.getElementById('thanks').classList.remove('hidden');
+ document.getElementById('ref').textContent=result.reference?'Reference: '+result.reference:'';
+ }catch{status.style.display='block';status.className='status error';status.textContent='Submission failed. Please try again later. Your information was not confirmed as saved.'}
+ finally{button.disabled=false}
+});
+</script></body></html>
